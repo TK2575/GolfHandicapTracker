@@ -1,0 +1,28 @@
+Simple Shiny WebApp to replace a "living"excel document tracking my golf game, performance, and handicap. 
+
+Inputted data expected for each golf round:
+Date
+Course
+Rating
+Slope
+Par
+Duration
+Transport
+Gross score
+Fairways in Reg
+Fairways to Hit
+Greens in Reg
+Putts
+
+Methods to compute the following:
+Over/Under (Gross)
+Course Handicap
+Net score
+Over/Under (Net)
+Resultant Handicap Index (Adjusts based on number of prior samples)
+Handicap Differential (Used for Course Handicap and Handicap Index)
+
+Other code (scripts/shiny app) will handle:
+Display of per round data
+Display of summary data
+Trending of performance over time, pivoting on various features
