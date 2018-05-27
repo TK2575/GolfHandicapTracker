@@ -1,0 +1,11 @@
+Package: GolfHandicapTracker
+Title: Golf Handicap Tracker
+Version: 0.0.0.9000
+Authors@R: person("Tom", "Kain", email = "TK2575@users.noreply.github.com", role = c("aut", "cre"))
+Description: Shiny CRUD WebApp that manages various calculations and visualizations into a single player's golf performance.
+Depends: R (>= 3.4.3)
+License: TBD
+Encoding: UTF-8
+LazyData: true
+Imports: magrittr
+Suggests: testthat
