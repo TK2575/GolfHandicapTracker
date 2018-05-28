@@ -1,4 +1,4 @@
-Date,Course,Tees,Rating,Slope,Par,Duration,Transport,18-hole score,Fairways Hit,Fairways To Hit,Greens in Reg,Putts
+Date,Course,Tees,Rating,Slope,Par,Duration,Transport,Score,Fairways Hit,Fairways To Hit,Greens in Reg,Putts
 5/24/2014,Golden Pheasant GC,White,67,116,72,4:22,Cart,99,6,14,1,35
 5/29/2014,Tavistock CC,White,67.5,122,72,4:54,Cart,101,6,14,2,39
 6/29/2014,Golden Pheasant GC,White,67,116,72,4:33,Cart,101,6,14,2,34
@@ -67,3 +67,4 @@ Date,Course,Tees,Rating,Slope,Par,Duration,Transport,18-hole score,Fairways Hit,
 4/27/2018,Tecolote Canyon Golf Course,Blue,58.6,101,58,3:18,Walk (Push),74,4,4,8,39
 5/6/2018,Tecolote Canyon Golf Course,Blue,58.6,101,58,3:38,Walk (Push),69,2,4,4,32
 5/19/2018,Eastlake Country Club,White,68,124,72,5:02,Walk (Push),87,8,14,6,33
+5/27/2018,Mission Trails Golf Course,Blue,68.9,119,71,4:21,Walk (Push),90,6,13,5,38

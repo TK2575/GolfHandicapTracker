@@ -11,11 +11,6 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins
    sidebarLayout(
       sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
       ),
 
       # Show a plot of the generated distribution
@@ -24,8 +19,11 @@ ui <- fluidPage(
                     tabPanel(title = "Plot",
                             "Plot here at some point"
                              ),
-                    tabPanel(title = "Data",
-                             dataTableOutput(outputId = "score_data"))
+                    tabPanel(title = "Input Data",
+                             dataTableOutput(outputId = "score_data")
+                             ),
+                    tabPanel(title = "Calculated Data",
+                             dataTableOutput(outputId = "calc_data"))
                     )
       )
    )
@@ -36,6 +34,10 @@ server <- function(input, output) {
 
    output$score_data <- renderDataTable ({
       score_data
+   })
+
+   output$calc_data <- renderDataTable ({
+     score_data
    })
 }
 

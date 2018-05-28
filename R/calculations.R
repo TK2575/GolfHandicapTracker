@@ -26,12 +26,21 @@
 #' Trending of performance over time, pivoting on various features
 #'
 #'
+transform_inputs <- function(input_data) {
+  input_data %>%
+    dplyr::mutate("Over/Under" = compute_over_under(Score, Par)) %>%
+    dplyr::mutate("Handicap Differential" = compute_handicap_differential(Score, Rating, Slope))
+    # handicap index
+    # course handicap
+    # net score
+}
+
 compute_over_under <- function(score, par) {
   return(score - par)
 }
 
 compute_course_handicap <- function(handicap_index, course_slope) {
-  return(handicap_index* (course_slope/113))
+  return(handicap_index * (course_slope/113))
 }
 
 compute_net_score <- function(score, course_handicap) {
@@ -50,6 +59,10 @@ compute_handicap_index <- function(handicap_differentials) {
     head(pick_differential_count(length(.)))
 
   return(mean(best_differentials)*.96)
+}
+
+find_first_index <- function(row_number) {
+  return(max(1, row_number-20))
 }
 
 pick_differential_count <- function(count) {
