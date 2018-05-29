@@ -7,5 +7,5 @@ Depends: R (>= 3.4.3)
 License: TBD
 Encoding: UTF-8
 LazyData: true
-Imports: magrittr, readr, ggplot2, dplyr
+Imports: magrittr, readr, ggplot2, dplyr, purrr
 Suggests: testthat
