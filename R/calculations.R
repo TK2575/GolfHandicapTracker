@@ -27,11 +27,22 @@
 #'
 #'
 transform_inputs <- function(input_data) {
-  input_data %>%
+  result <- input_data %>%
     dplyr::mutate("Over/Under" = compute_over_under(Score, Par)) %>%
-    dplyr::mutate("Handicap Differential" = compute_handicap_differential(Score, Rating, Slope)) %>%
-    dplyr::mutate("ID" = row_number())
-    # dplyr::mutate(first_id = v_find_first_index(ID))
+    dplyr::mutate(hndcp_diff = compute_handicap_differential(Score, Rating, Slope))
+
+    diffs <- input_data$hndcp_diff
+
+    hndcp_indexes <- purrr::map(
+      c(1:length(diffs)),
+      compute_handicap_index,
+      handicap_differentials = diffs
+      )
+
+    result <- result %>%
+      tibble::add_column(hndcp_indexes) %>%
+      dplyr::rename("Handicap Index" = hndcp_indexes)
+
     # handicap index
     # course handicap
     # net score
@@ -55,19 +66,23 @@ compute_handicap_differential <- function(score, course_rating, course_slope) {
 
 compute_handicap_index <- function(index, handicap_differentials) {
   # TODO check if handicap_differentials is a vector
-  diff_count <- pick_differential_count(index)
+  diff_count <- pick_sample_size(index)
 
   if (diff_count > 0) {
-    result <- handicap_differentials[1:index] %>%
+    first_index <- find_first_index(index)
+
+    dt <- handicap_differentials[first_index:index] %>%
       sort() %>%
-      head(diff_count) %>%
-      mean() * .96
+      head(diff_count)
+
+    result <- mean(dt) * .96
+
   } else {result <- NA}
 
   result
 }
 
-v_compute_handicap_index <- Vectorize(compute_handicap_index)
+
 
 find_first_index <- function(row_number) {
   return(max(1, row_number-19))
@@ -75,7 +90,7 @@ find_first_index <- function(row_number) {
 
 v_find_first_index <- Vectorize(find_first_index)
 
-pick_differential_count <- function(count) {
+pick_sample_size <- function(count) {
   if (count < 5) {
     result <- 0
   } else if (count %in% c(5,6)) {
