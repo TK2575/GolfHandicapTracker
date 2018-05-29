@@ -55,14 +55,13 @@ compute_handicap_differential <- function(score, course_rating, course_slope) {
 
 compute_handicap_index <- function(index, handicap_differentials) {
   # TODO check if handicap_differentials is a vector
-  avg_count <- pick_differential_count(index)
+  diff_count <- pick_differential_count(index)
 
-  if (avg_count > 0) {
-    best_differentials <- handicap_differentials[1:index] %>%
+  if (diff_count > 0) {
+    result <- handicap_differentials[1:index] %>%
       sort() %>%
-      head(avg_count)
-
-    result <- mean(best_differentials) * .96
+      head(diff_count) %>%
+      mean() * .96
   } else {result <- NA}
 
   result
@@ -77,26 +76,25 @@ find_first_index <- function(row_number) {
 v_find_first_index <- Vectorize(find_first_index)
 
 pick_differential_count <- function(count) {
-  # TODO check if count has length >= 5
   if (count < 5) {
     result <- 0
-  } else if (count < 7) {
+  } else if (count %in% c(5,6)) {
     result <- 1
-  } else if (count < 9) {
+  } else if (count %in% c(7,8)) {
     result <- 2
-  } else if (count < 11) {
+  } else if (count %in% c(9,10)) {
     result <- 3
-  } else if (count < 13) {
+  } else if (count %in% c(11,12)) {
     result <- 4
-  } else if (count < 15) {
+  } else if (count %in% c(13,14)) {
     result <- 5
-  } else if (count < 17) {
+  } else if (count %in% c(15,16)) {
     result <- 6
-  } else if (count < 18) {
+  } else if (count == 17) {
     result <- 7
-  } else if (count < 19) {
+  } else if (count == 18) {
     result <- 8
-  } else if (count < 20) {
+  } else if (count == 19) {
     result <- 9
   } else result <- 10
 
