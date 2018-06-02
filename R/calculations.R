@@ -28,25 +28,25 @@
 #'
 transform_inputs <- function(input_data) {
   result <- input_data %>%
-    dplyr::mutate("Over/Under" = compute_over_under(Score, Par)) %>%
-    dplyr::mutate("Handicap Differential" = compute_handicap_differential(Score, Rating, Slope))
+    dplyr::mutate(ovr_undr = compute_over_under(Score, Par),
+                  hndcp_diff = compute_handicap_differential(Score, Rating, Slope))
 
-    diffs <- input_data$`Handicap Differential`
+    diff <- result %>% select(hndcp_diff) %>% dplyr::pull()
+    purrr::map(
+     .x=c(1:length(diff)),
+     .f=compute_handicap_index,
+     handicap_differentials=diff)
 
     hndcp_indexes <-
       purrr::map(c(1:length(diffs)),compute_handicap_index,handicap_differentials = diffs) %>%
       unlist()
 
-    result <- result %>%
-      tibble::add_column(hndcp_indexes)
-
-    #result <- result %>%
-     # tibble::add_column(hndcp_indexes) #%>%
-      # dplyr::mutate("Course Handicap" = compute_course_handicap(hndcp_indexes, Slope)) %>%
-      # dplyr::rename("Handicap Index" = hndcp_indexes) %>%
-      # dplyr::mutate("Net Score" = compute_net_score(Score, `Course Handicap`))
-
-    result
+    result %>%
+      tibble::add_column(hndcp_indexes) %>%
+      dplyr::mutate("Course Handicap" = compute_course_handicap(hndcp_indexes, Slope)) %>%
+      dplyr::rename("Handicap Index" = hndcp_indexes) %>%
+      dplyr::mutate("Net Score" = compute_net_score(Score, `Course Handicap`)) %>%
+      dplyr::select(-hndcp_diff)
 }
 
 compute_over_under <- function(score, par) {
