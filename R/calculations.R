@@ -28,10 +28,10 @@
 #'
 transform_inputs <- function(input_data) {
   result <- input_data %>%
-    dplyr::mutate(ovr_undr = compute_over_under(Score, Par),
+    dplyr::mutate("Over/Under" = compute_over_under(Score, Par),
                   hndcp_diff = compute_handicap_differential(Score, Rating, Slope))
 
-    diff <- result %>% select(hndcp_diff) %>% dplyr::pull()
+    diffs <- result %>% select(hndcp_diff) %>% dplyr::pull()
     purrr::map(
      .x=c(1:length(diff)),
      .f=compute_handicap_index,
@@ -46,7 +46,9 @@ transform_inputs <- function(input_data) {
       dplyr::mutate("Course Handicap" = compute_course_handicap(hndcp_indexes, Slope)) %>%
       dplyr::rename("Handicap Index" = hndcp_indexes) %>%
       dplyr::mutate("Net Score" = compute_net_score(Score, `Course Handicap`)) %>%
-      dplyr::select(-hndcp_diff)
+      dplyr::mutate(dt = lubridate::mdy(`Date`)) %>%
+      dplyr::select(-hndcp_diff, -`Date`) %>%
+      dplyr::rename("Date" = dt)
 }
 
 compute_over_under <- function(score, par) {

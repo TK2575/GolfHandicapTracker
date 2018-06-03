@@ -1,6 +1,8 @@
 library(shiny)
+source("../R/calculations.R")
 
 score_data <- readr::read_csv("../data/example.csv")
+calculated_data <- transform_inputs(score_data)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -17,13 +19,14 @@ ui <- fluidPage(
       mainPanel(
         tabsetPanel(id = "tabspanel", type = "tabs",
                     tabPanel(title = "Plot",
-                            "Plot here at some point"
+                            plotOutput(outputId = "plot")
                              ),
                     tabPanel(title = "Input Data",
                              dataTableOutput(outputId = "score_data")
                              ),
                     tabPanel(title = "Calculated Data",
-                             dataTableOutput(outputId = "calc_data"))
+                             dataTableOutput(outputId = "calc_data")
+                             )
                     )
       )
    )
@@ -37,7 +40,12 @@ server <- function(input, output) {
    })
 
    output$calc_data <- renderDataTable ({
-     score_data
+     calculated_data
+   })
+
+   output$plot <- renderPlot({
+     ggplot(calculated_data, aes(Date, `Handicap Index`)) +
+       geom_point()
    })
 }
 
