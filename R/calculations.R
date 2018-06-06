@@ -19,6 +19,7 @@
 #' Over/Under (Net)
 #' Resultant Handicap Index (Adjusts based on number of prior samples)
 #' Handicap Differential (Used for Course Handicap and Handicap Index)
+#' Percent FIR, GIR
 #'
 #' Other code (scripts/shiny app) will handle:
 #' Display of per round data
@@ -48,7 +49,9 @@ transform_inputs <- function(input_data) {
       dplyr::mutate("Net Score" = compute_net_score(Score, `Course Handicap`)) %>%
       dplyr::mutate(dt = lubridate::mdy(`Date`)) %>%
       dplyr::select(-hndcp_diff, -`Date`) %>%
-      dplyr::rename("Date" = dt)
+      dplyr::rename("Date" = dt) %>%
+      dplyr::mutate("FIR" = `Fairways Hit`/`Fairways To Hit` * 100) %>%
+      dplyr::mutate("GIR" = `Greens in Reg`/18 * 100)
 }
 
 compute_over_under <- function(score, par) {

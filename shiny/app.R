@@ -18,8 +18,11 @@ ui <- fluidPage(
       # Show a plot of the generated distribution
       mainPanel(
         tabsetPanel(id = "tabspanel", type = "tabs",
-                    tabPanel(title = "Plot",
-                            plotOutput(outputId = "plot")
+                    tabPanel(title = "Summary",
+                             plotOutput(outputId = "summary")
+                             ),
+                    tabPanel(title = "Trend",
+                            plotOutput(outputId = "trend")
                              ),
                     tabPanel(title = "Input Data",
                              dataTableOutput(outputId = "score_data")
@@ -43,9 +46,16 @@ server <- function(input, output) {
      calculated_data
    })
 
-   output$plot <- renderPlot({
+   output$trend <- renderPlot({
      ggplot(calculated_data, aes(Date, `Handicap Index`)) +
        geom_point()
+   })
+
+   output$summary <- renderPlot({
+     ggplot(calculated_data, aes(GIR, FIR, col = Putts)) +
+       geom_jitter(aes(size = Score, alpha = Date)) +
+       xlab("Greens in Regulation") +
+       ylab("Fairways in Regulation")
    })
 }
 
