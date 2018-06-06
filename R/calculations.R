@@ -51,7 +51,9 @@ transform_inputs <- function(input_data) {
       dplyr::select(-hndcp_diff, -`Date`) %>%
       dplyr::rename("Date" = dt) %>%
       dplyr::mutate("FIR" = `Fairways Hit`/`Fairways To Hit` * 100) %>%
-      dplyr::mutate("GIR" = `Greens in Reg`/18 * 100)
+      dplyr::mutate("GIR" = `Greens in Reg`/18 * 100) %>%
+      dplyr::mutate("Net Over/Under" = as.integer(round(`Net Score` - Par)))
+    # TODO bin rounds by date or some sequential grouping and use those as factors in display (rather than continuous date)
 }
 
 compute_over_under <- function(score, par) {

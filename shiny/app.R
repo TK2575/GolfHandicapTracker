@@ -53,9 +53,10 @@ server <- function(input, output) {
 
    output$summary <- renderPlot({
      ggplot(calculated_data, aes(GIR, FIR, col = Putts)) +
-       geom_jitter(aes(size = Score, alpha = Date)) +
+       geom_jitter(aes(size = `Net Over/Under`, alpha = Date)) +
        xlab("Greens in Regulation") +
-       ylab("Fairways in Regulation")
+       ylab("Fairways in Regulation") +
+       scale_color_gradientn(colors = colors)
    })
 }
 
