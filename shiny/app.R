@@ -13,6 +13,10 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins
    sidebarLayout(
       sidebarPanel(
+        sliderInput(inputId = "recent_slider",
+                    label = "Recent Rounds:",
+                    min = 3, max = 30,
+                    value = 10)
       ),
 
       # Show a plot of the generated distribution
@@ -24,10 +28,7 @@ ui <- fluidPage(
                     tabPanel(title = "Trend",
                             plotOutput(outputId = "trend")
                              ),
-                    tabPanel(title = "Input Data",
-                             dataTableOutput(outputId = "score_data")
-                             ),
-                    tabPanel(title = "Calculated Data",
+                    tabPanel(title = "Data",
                              dataTableOutput(outputId = "calc_data")
                              )
                     )
@@ -38,25 +39,26 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-   output$score_data <- renderDataTable ({
-      score_data
-   })
+  filtered_data <- reactive({
+    tail(calculated_data, input$recent_slider)
+  })
 
    output$calc_data <- renderDataTable ({
      calculated_data
    })
 
    output$trend <- renderPlot({
-     ggplot(calculated_data, aes(Date, `Handicap Index`)) +
+     ggplot(filtered_data(), aes(Date, `Handicap Index`)) +
        geom_point()
    })
 
    output$summary <- renderPlot({
-     ggplot(calculated_data, aes(GIR, FIR, col = Putts)) +
-       geom_jitter(aes(size = `Net Over/Under`, alpha = Date)) +
+     filtered_data() %>%
+     ggplot(aes(GIR, FIR, col = Putts)) +
+       geom_jitter(aes(size = `Net Over/Under`)) +
        xlab("Greens in Regulation") +
        ylab("Fairways in Regulation") +
-       scale_color_gradientn(colors = colors)
+       scale_color_gradientn(colors = RColorBrewer::brewer.pal(9, "GnBu"))
    })
 }
 
