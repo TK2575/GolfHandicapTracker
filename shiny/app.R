@@ -44,7 +44,7 @@ server <- function(input, output) {
   })
 
    output$calc_data <- renderDataTable ({
-     calculated_data
+     filtered_data()
    })
 
    output$trend <- renderPlot({
@@ -58,7 +58,7 @@ server <- function(input, output) {
        geom_jitter(aes(size = `Net Over/Under`)) +
        xlab("Greens in Regulation") +
        ylab("Fairways in Regulation") +
-       scale_color_gradientn(colors = RColorBrewer::brewer.pal(9, "GnBu"))
+       scale_color_gradientn(colors = terrain.colors(9))
    })
 }
 
