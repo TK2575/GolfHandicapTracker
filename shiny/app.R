@@ -1,64 +1,78 @@
 library(shiny)
 source("../R/calculations.R")
 
-score_data <- readr::read_csv("../data/example.csv")
+score_data <- suppressMessages(readr::read_csv("../data/example.csv"))
 calculated_data <- transform_inputs(score_data)
 
-# Define UI for application that draws a histogram
 ui <- fluidPage(
 
-   # Application title
    titlePanel("Golf Performance Tracker"),
 
-   # Sidebar with a slider input for number of bins
    sidebarLayout(
       sidebarPanel(
+        selectInput(inputId = "y",
+                    label = "Y-axis:",
+                    choices = c("Handicap Index" = "hndcp_index",
+                                "Fairways in Regulation" = "fir",
+                                "Greens in Regulation" = "gir",
+                                "Putts Per Hole" = "pph"),
+                    # TODO Round/Row count, Median/Sum Over/Under, Distinct Courses
+                    selected = "hndcp_index"),
+
         sliderInput(inputId = "recent_slider",
                     label = "Recent Rounds:",
-                    min = 3, max = 30,
-                    value = 10)
+                    min = 1, max = nrow(calculated_data),
+                    value = floor(nrow(calculated_data)/2),
+                    step = 1)
       ),
 
-      # Show a plot of the generated distribution
       mainPanel(
         tabsetPanel(id = "tabspanel", type = "tabs",
-                    tabPanel(title = "Summary",
+                    tabPanel(title = "Over Time",
                              plotOutput(outputId = "summary")
                              ),
-                    tabPanel(title = "Trend",
-                            plotOutput(outputId = "trend")
-                             ),
-                    tabPanel(title = "Data",
-                             dataTableOutput(outputId = "calc_data")
+                    # tabPanel(title = "By Slope",
+                    #         plotOutput(outputId = "slope")
+                    #          ),
+                    tabPanel(title = "By Transport",
+                             plotOutput(outputId = "transport")
                              )
                     )
       )
    )
 )
 
-# Define server logic required to draw a histogram
 server <- function(input, output) {
 
   filtered_data <- reactive({
-    tail(calculated_data, input$recent_slider)
+    calculated_data %>%
+      tail(input$recent_slider)
   })
 
-   output$calc_data <- renderDataTable ({
-     filtered_data()
-   })
+  output$slope <- renderPlot({
+    filtered_data() %>%
+      ggplot(aes(factor()))
+  })
 
-   output$trend <- renderPlot({
-     ggplot(filtered_data(), aes(Date, `Handicap Index`)) +
-       geom_point()
-   })
+  output$transport <- renderPlot({
+    filtered_data() %>%
+      ggplot(aes(factor(Transport), input$y, col = desc(quarter))) +
+        geom_jitter(width = .2) +
+        scale_color_gradientn(colors = terrain.colors(9))
+    # FIXME display of quarter in legend
+    # FIXME display scale in Y axis
+    # FIXME clean up x/y labels
+  })
 
-   output$summary <- renderPlot({
-     filtered_data() %>%
-     ggplot(aes(GIR, FIR, col = Putts)) +
-       geom_jitter(aes(size = `Net Over/Under`)) +
-       xlab("Greens in Regulation") +
-       ylab("Fairways in Regulation") +
-       scale_color_gradientn(colors = terrain.colors(9))
+  # Example working plot
+  output$summary <- renderPlot({
+     calculated_data %>%
+       tail(input$recent_slider) %>%
+       ggplot(aes(gir, fir, col = pph)) +
+         geom_jitter(aes(size = net_over_under)) +
+         xlab("Greens in Regulation") +
+         ylab("Fairways in Regulation") +
+         scale_color_gradientn(colors = terrain.colors(9))
    })
 }
 

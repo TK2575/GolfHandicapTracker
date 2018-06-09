@@ -29,7 +29,7 @@
 #'
 transform_inputs <- function(input_data) {
   result <- input_data %>%
-    dplyr::mutate("Over/Under" = compute_over_under(Score, Par),
+    dplyr::mutate(over_under = compute_over_under(Score, Par),
                   hndcp_diff = compute_handicap_differential(Score, Rating, Slope))
 
     diffs <- result %>% select(hndcp_diff) %>% dplyr::pull()
@@ -38,22 +38,23 @@ transform_inputs <- function(input_data) {
      .f=compute_handicap_index,
      handicap_differentials=diff)
 
-    hndcp_indexes <-
+    hndcp_index <-
       purrr::map(c(1:length(diffs)),compute_handicap_index,handicap_differentials = diffs) %>%
       unlist()
 
     result %>%
-      tibble::add_column(hndcp_indexes) %>%
-      dplyr::mutate("Course Handicap" = compute_course_handicap(hndcp_indexes, Slope)) %>%
-      dplyr::rename("Handicap Index" = hndcp_indexes) %>%
-      dplyr::mutate("Net Score" = compute_net_score(Score, `Course Handicap`)) %>%
-      dplyr::mutate(dt = lubridate::mdy(`Date`)) %>%
-      dplyr::select(-hndcp_diff, -`Date`) %>%
-      dplyr::rename("Date" = dt) %>%
-      dplyr::mutate("FIR" = `Fairways Hit`/`Fairways To Hit` * 100) %>%
-      dplyr::mutate("GIR" = `Greens in Reg`/18 * 100) %>%
-      dplyr::mutate("Net Over/Under" = as.integer(round(`Net Score` - Par)))
-    # TODO bin rounds by date or some sequential grouping and use those as factors in display (rather than continuous date)
+      tibble::add_column(hndcp_index) %>%
+      dplyr::mutate(course_handicap = compute_course_handicap(hndcp_index, Slope)) %>%
+      dplyr::mutate(net_score = compute_net_score(Score, course_handicap)) %>%
+      dplyr::mutate(dt = lubridate::mdy(Date)) %>%
+      dplyr::select(-hndcp_diff, -Date) %>%
+      dplyr::rename(date = dt) %>%
+      dplyr::mutate(quarter = lubridate::floor_date(date, "quarter")) %>%
+      dplyr::mutate(fir = `Fairways Hit`/`Fairways To Hit` * 100) %>%
+      dplyr::mutate(gir = `Greens in Reg`/18 * 100) %>%
+      dplyr::mutate(pph = Putts/18) %>%
+      dplyr::mutate(net_over_under = as.integer(round(net_score - Par)))
+    # TODO group slopes into bins
 }
 
 compute_over_under <- function(score, par) {
