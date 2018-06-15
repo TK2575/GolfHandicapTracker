@@ -78,10 +78,10 @@ server <- function(input, output) {
 
   output$over_time <- renderPlot({
     filtered_data() %>%
-      ggplot(aes(date, net_over_under)) +
+      ggplot(aes(date, over_under)) +
         geom_jitter() +
         xlab("Date") +
-        ylab("Net Over/Under") +
+        ylab("Over/Under") +
         geom_line(aes(date, hndcp_index))
   })
 }
