@@ -29,7 +29,10 @@ ui <- fluidPage(
       mainPanel(
         tabsetPanel(id = "tabspanel", type = "tabs",
                     tabPanel(title = "Over Time",
-                             plotOutput(outputId = "summary")
+                             plotOutput(outputId = "over_time")
+                             ),
+                    tabPanel(title = "GIR vs FIR",
+                             plotOutput(outputId = "gir_fir")
                              ),
                     # tabPanel(title = "By Slope",
                     #         plotOutput(outputId = "slope")
@@ -64,16 +67,23 @@ server <- function(input, output) {
     # FIXME clean up x/y labels
   })
 
-  # Example working plot
-  output$summary <- renderPlot({
-     calculated_data %>%
-       tail(input$recent_slider) %>%
+  output$gir_fir <- renderPlot({
+     filtered_data() %>%
        ggplot(aes(gir, fir, col = pph)) +
          geom_jitter(aes(size = net_over_under)) +
          xlab("Greens in Regulation") +
          ylab("Fairways in Regulation") +
          scale_color_gradientn(colors = terrain.colors(9))
    })
+
+  output$over_time <- renderPlot({
+    filtered_data() %>%
+      ggplot(aes(date, net_over_under)) +
+        geom_jitter() +
+        xlab("Date") +
+        ylab("Net Over/Under") +
+        geom_line(aes(date, hndcp_index))
+  })
 }
 
 # Run the application
