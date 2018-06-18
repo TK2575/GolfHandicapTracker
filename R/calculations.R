@@ -1,32 +1,4 @@
-#' Inputted data expected for each golf round:
-#' Date
-#' Course
-#' Rating
-#' Slope
-#' Par
-#' Duration
-#' Transport
-#' Gross score
-#' Fairways in Reg
-#' Fairways to Hit
-#' Greens in Reg
-#' Putts
-#'
-#' Methods to compute the following:
-#' Over/Under (Gross)
-#' Course Handicap
-#' Net score
-#' Over/Under (Net)
-#' Resultant Handicap Index (Adjusts based on number of prior samples)
-#' Handicap Differential (Used for Course Handicap and Handicap Index)
-#' Percent FIR, GIR
-#'
-#' Other code (scripts/shiny app) will handle:
-#' Display of per round data
-#' Display of summary data
-#' Trending of performance over time, pivoting on various features
-#'
-#'
+# TODO support nine hole rounds
 transform_inputs <- function(input_data) {
   result <- input_data %>%
     dplyr::mutate(over_under = compute_over_under(Score, Par),
