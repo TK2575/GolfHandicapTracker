@@ -32,7 +32,7 @@ ui <- fluidPage(
                              plotOutput(outputId = "over_time")
                              ),
                     tabPanel(title = "GIR vs FIR",
-                             plotOutput(outputId = "gir_fir")
+                             plotlyOutput(outputId = "gir_fir")
                              ),
                     # tabPanel(title = "By Slope",
                     #         plotOutput(outputId = "slope")
@@ -67,13 +67,17 @@ server <- function(input, output) {
     # FIXME clean up x/y labels
   })
 
-  output$gir_fir <- renderPlot({
-     filtered_data() %>%
-       ggplot(aes(gir, fir, col = pph)) +
-         geom_jitter(aes(size = net_over_under)) +
-         xlab("Greens in Regulation") +
-         ylab("Fairways in Regulation") +
+  output$gir_fir <- renderPlotly({
+     p <- filtered_data() %>%
+       ggplot(aes(x=fir, y=gir, size = pph, color=net_over_under)) +
+         geom_jitter(width = .2, alpha = .5) +
+         ylab("Greens in Regulation") +
+         xlab("Fairways in Regulation") +
+         xlim(c(0,100)) +
+         ylim(c(0,100)) +
+         scale_size_continuous(trans="exp") +
          scale_color_gradientn(colors = terrain.colors(9))
+     ggplotly(p)
    })
 
   output$over_time <- renderPlot({
