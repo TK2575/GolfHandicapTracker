@@ -1,4 +1,5 @@
 # TODO support nine hole rounds
+# TODO sort by date, check for duplicates
 transform_inputs <- function(input_data) {
   result <- input_data %>%
     dplyr::mutate(over_under = compute_over_under(Score, Par),
