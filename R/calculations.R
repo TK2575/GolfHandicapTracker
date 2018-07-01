@@ -1,5 +1,4 @@
 # TODO support nine hole rounds
-# TODO sort by date, check for duplicates
 transform_inputs <- function(input_data) {
   result <- input_data %>%
     validate_inputs %>%
