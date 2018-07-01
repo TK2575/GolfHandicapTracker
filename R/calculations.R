@@ -2,6 +2,7 @@
 # TODO sort by date, check for duplicates
 transform_inputs <- function(input_data) {
   result <- input_data %>%
+    validate_inputs %>%
     dplyr::mutate(over_under = compute_over_under(Score, Par),
                   hndcp_diff = compute_handicap_differential(Score, Rating, Slope))
 
@@ -94,4 +95,35 @@ pick_sample_size <- function(count) {
   } else result <- 10
 
   result
+}
+
+validate_inputs <- function(input_data) {
+  required_columns <- c("Date",
+                        "Rating",
+                        "Slope",
+                        "Par",
+                        "Score",
+                        "Fairways Hit",
+                        "Fairways to Hit",
+                        "Greens in Reg",
+                        "Putts")
+
+  optional_columns <- c("Course",
+                        "Tees",
+                        "Duration",
+                        "Transport",
+                        "Nine Hole Round")
+
+  empty_columns <- colnames(input_data)[which(colSums(is.na(input_data)) == nrow(input_data))]
+
+  result <- input_data %>% dplyr::select(-empty_columns)
+
+  if (length(required_columns) > sum(required_columns %in% names(result))) {
+    stop("Missing or Empty Required column(s)")
+  }
+
+  if (length(optional_columns) > sum(optional_columns %in% names(result))) {
+    warning("Missing or Empty Optional column(s)")
+  }
+
 }

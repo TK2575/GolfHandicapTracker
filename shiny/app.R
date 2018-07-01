@@ -10,6 +10,7 @@ ui <- fluidPage(
 
    sidebarLayout(
       sidebarPanel(
+        # TODO build data input section, single rounds, full files, and helper for finding courses via ncrdb.usga.org
         selectInput(inputId = "y",
                     label = "Y-axis:",
                     choices = c("Handicap Index" = "hndcp_index",
