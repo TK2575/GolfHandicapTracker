@@ -1,4 +1,4 @@
-Date,Course,Tees,Rating,Slope,Par,Duration,Transport,Score,Fairways Hit,Fairways To Hit,Greens in Reg,Putts,Nine Hole Round
+date,course,tees,rating,slope,par,duration,transport,score,fairways_hit,fairways,greens_in_reg,putts,nine_hole_round
 12/11/2016,Tecolote Canyon Golf Course,Blue,58.6,101,58,3:01,Cart,69,3,4,4,33,TRUE
 10/14/2016,Balboa Park (18),White,68.9,124,36,2:18,Cart,46,3,7,3,20,TRUE
 10/8/2016,Temecula Creek Inn (Creek),Blue,71.6,130,36,1:27,Cart,47,4,7,2,19,TRUE

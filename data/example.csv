@@ -1,4 +1,4 @@
-Date,Course,Tees,Rating,Slope,Par,Duration,Transport,Score,Fairways Hit,Fairways To Hit,Greens in Reg,Putts
+date,course,tees,rating,slope,par,duration,transport,score,fairways_hit,fairways,greens_in_reg,putts
 5/24/2014,Golden Pheasant GC,White,67,116,72,4:22,Cart,99,6,14,1,35
 5/29/2014,Tavistock CC,White,67.5,122,72,4:54,Cart,101,6,14,2,39
 6/29/2014,Golden Pheasant GC,White,67,116,72,4:33,Cart,101,6,14,2,34

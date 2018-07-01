@@ -3,8 +3,17 @@
 transform_inputs <- function(input_data) {
   result <- input_data %>%
     validate_inputs %>%
-    dplyr::mutate(over_under = compute_over_under(Score, Par),
-                  hndcp_diff = compute_handicap_differential(Score, Rating, Slope))
+    unique %>%
+    dplyr::mutate(dt = lubridate::mdy(date)) %>%
+    dplyr::select(-hndcp_diff, -date) %>%
+    dplyr::rename(date = dt) %>%
+    dplyr::mutate(quarter = lubridate::floor_date(date, "quarter")) %>%
+    dplyr::arrange(date) %>%
+    dplyr::mutate(over_under = compute_over_under(score, par),
+                  hndcp_diff = compute_handicap_differential(score, rating, slope)) %>%
+    dplyr::mutate(fir = fairways_hit/fairways * 100) %>%
+    dplyr::mutate(gir = greens_in_reg/18 * 100) %>%
+    dplyr::mutate(pph = putts/18)
 
     diffs <- result %>% select(hndcp_diff) %>% dplyr::pull()
     purrr::map(
@@ -18,17 +27,9 @@ transform_inputs <- function(input_data) {
 
     result %>%
       tibble::add_column(hndcp_index) %>%
-      dplyr::mutate(course_handicap = compute_course_handicap(hndcp_index, Slope)) %>%
-      dplyr::mutate(net_score = compute_net_score(Score, course_handicap)) %>%
-      dplyr::mutate(dt = lubridate::mdy(Date)) %>%
-      dplyr::select(-hndcp_diff, -Date) %>%
-      dplyr::rename(date = dt) %>%
-      dplyr::mutate(quarter = lubridate::floor_date(date, "quarter")) %>%
-      dplyr::mutate(fir = `Fairways Hit`/`Fairways To Hit` * 100) %>%
-      dplyr::mutate(gir = `Greens in Reg`/18 * 100) %>%
-      dplyr::mutate(pph = Putts/18) %>%
-      dplyr::mutate(net_over_under = as.integer(round(net_score - Par)))
-    # TODO group slopes into bins
+      dplyr::mutate(course_handicap = compute_course_handicap(hndcp_index, slope)) %>%
+      dplyr::mutate(net_score = compute_net_score(score, course_handicap)) %>%
+      dplyr::mutate(net_over_under = as.integer(round(net_score - par)))
 }
 
 compute_over_under <- function(score, par) {
@@ -48,7 +49,6 @@ compute_handicap_differential <- function(score, course_rating, course_slope) {
 }
 
 compute_handicap_index <- function(index, handicap_differentials) {
-  # TODO check if handicap_differentials is a vector
   diff_count <- pick_sample_size(index)
 
   if (diff_count > 0) {
@@ -68,8 +68,6 @@ compute_handicap_index <- function(index, handicap_differentials) {
 find_first_index <- function(row_number) {
   return(max(1, row_number-19))
 }
-
-v_find_first_index <- Vectorize(find_first_index)
 
 pick_sample_size <- function(count) {
   if (count < 5) {
@@ -98,21 +96,21 @@ pick_sample_size <- function(count) {
 }
 
 validate_inputs <- function(input_data) {
-  required_columns <- c("Date",
-                        "Rating",
-                        "Slope",
-                        "Par",
-                        "Score",
-                        "Fairways Hit",
-                        "Fairways to Hit",
-                        "Greens in Reg",
-                        "Putts")
+  required_columns <- c("date",
+                        "rating",
+                        "slope",
+                        "par",
+                        "score",
+                        "fairways_hit",
+                        "fairways",
+                        "greens_in_reg",
+                        "putts")
 
-  optional_columns <- c("Course",
-                        "Tees",
-                        "Duration",
-                        "Transport",
-                        "Nine Hole Round")
+  optional_columns <- c("course",
+                        "tees",
+                        "duration",
+                        "transport",
+                        "nine_hole_round")
 
   empty_columns <- colnames(input_data)[which(colSums(is.na(input_data)) == nrow(input_data))]
 
