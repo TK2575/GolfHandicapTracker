@@ -1,4 +1,4 @@
 date,course,tees,rating,slope,par,duration,transport,score,fairways_hit,fairways,greens_in_reg,putts,nine_hole_round
-6/17/2018,Mercer Oaks Golf Course (West),White,70.7,131,36, ,Cart,49,4,7,0,15,true
-6/22/2018,Eisenhower Park GC (White),White,71.0,124,36, ,Cart,50,0,7,1,20,true
-7/7/2018,Bethpage State Park Golf Course (Red),White,71.9,127,70, ,Cart,106,5,14,1,34,false
+6/17/2018,Mercer Oaks Golf Course (West),White,70.7,131,36,2:20,Cart,49,4,7,0,15,true
+6/22/2018,Eisenhower Park GC (White),White,71.0,124,36,2:24,Cart,50,0,7,1,20,true
+7/7/2018,Bethpage State Park Golf Course (Red),White,71.9,127,70,4:45,Cart,106,5,14,1,34,false
