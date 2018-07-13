@@ -87,7 +87,6 @@ compute_nine_hole_rounds <- function(df) {
 }
 
 validate_inputs <- function(input_data) {
-  # TODO exclude unknown columns
   required_columns <- c("date",
                         "rating",
                         "slope",
@@ -104,6 +103,8 @@ validate_inputs <- function(input_data) {
                         "transport",
                         "nine_hole_round")
 
+  all_columns <- c(required_columns, optional_columns)
+
   empty_columns <- colnames(input_data)[which(colSums(is.na(input_data)) == nrow(input_data))]
 
   result <- input_data %>% dplyr::select(-dplyr::one_of(empty_columns))
@@ -116,7 +117,7 @@ validate_inputs <- function(input_data) {
     warning("Missing or Empty Optional column(s)")
   }
 
-  result
+  result[, names(result) %in% all_columns]
 }
 
 initial_transformation <- function(input_data) {
