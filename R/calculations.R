@@ -5,12 +5,28 @@ transform_inputs <- function(input_data) {
     validate_inputs() %>%
     initial_transformation()
 
-  result <- add_handicap_indexes(result)
+  if (suppressWarnings(sum(result$nine_hole_round)) > 1) {
+    nine_hole_rounds <- result %>%
+      subset(nine_hole_round==T) %>%
+      compute_nine_hole_rounds()
+
+    eighteen_hole_rounds <- result %>%
+      subset(nine_hole_round==F)
+
+    result <- dplyr::bind_rows(eighteen_hole_rounds, nine_hole_rounds) %>%
+      dplyr::arrange(date)
+  }
+
+  result <- result %>%
+    second_transformation() %>%
+    add_handicap_indexes
 
   result %>%
     dplyr::mutate(net_score = compute_net_score(score, course_handicap)) %>%
     dplyr::mutate(net_over_under = as.integer(round(net_score - par))) %>%
     dplyr::select(-hndcp_diff)
+
+  result
 }
 
 compute_over_under <- function(score, par) {
@@ -83,7 +99,17 @@ compute_nine_hole_rounds <- function(df) {
     df <- df[1:nrow(df)-1,]
   }
 
-# TODO - from each odd numbered row, "sum" up it and the lead (next even numbered) row
+df_odd <- df[seq(1,nrow(df),by=2),]
+df_even <- df[seq(2,nrow(df),by=2),]
+
+# TODO -
+# from each odd numbered row, "sum" up it and corresponding even row (i.e. purrr::map2) as new row in fresh df
+# Course, Tees, Transport = (if not the same) "Various"
+# Rating, Par, Duration, Score, fairways_hit, fairways, greens_in_reg, putts = sum
+# Slope = mean
+# nine_hole_round = T
+# Date, Quarter = max (presumably even-numbered row)
+
 }
 
 validate_inputs <- function(input_data) {
@@ -121,7 +147,7 @@ validate_inputs <- function(input_data) {
 }
 
 initial_transformation <- function(input_data) {
-  result <- input_data %>%
+  input_data %>%
     unique() %>%
     dplyr::mutate(dt = lubridate::mdy(date)) %>%
     dplyr::select(-date) %>%
@@ -129,19 +155,10 @@ initial_transformation <- function(input_data) {
     dplyr::mutate(quarter = lubridate::floor_date(date, "quarter")) %>%
     dplyr::arrange(date)
 
-  if ("nine_hole_round" %in% names(result)) {
-    nine_hole_rounds <- result %>%
-      subset(nine_hole_round==T) %>%
-      compute_nine_hole_rounds()
+}
 
-    eighteen_hole_rounds <- result %>%
-      subset(nine_hole_round==F)
-
-    result <- dplyr::bind_rows(eighteen_hole_rounds, nine_hole_rounds) %>%
-      dplyr::arrange(date)
-  }
-
-  result <- result %>%
+second_transformation <- function(input_data) {
+  result <- input_data %>%
     dplyr::mutate(over_under = compute_over_under(score, par),
                   hndcp_diff = compute_handicap_differential(score, rating, slope)) %>%
     dplyr::mutate(fir = fairways_hit/fairways * 100) %>%
@@ -166,5 +183,4 @@ add_handicap_indexes <- function(df) {
     tibble::add_column(hndcp_index) %>%
     dplyr::mutate(course_handicap = compute_course_handicap(hndcp_index, slope))
 }
-
 
