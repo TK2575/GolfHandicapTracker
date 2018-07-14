@@ -99,17 +99,32 @@ compute_nine_hole_rounds <- function(df) {
     df <- df[1:nrow(df)-1,]
   }
 
-df_odd <- df[seq(1,nrow(df),by=2),]
-df_even <- df[seq(2,nrow(df),by=2),]
+# TODO pass df in pairs of rows to merge_nine_hole_rounds(), store each result in new df
 
-# TODO -
-# from each odd numbered row, "sum" up it and corresponding even row (i.e. purrr::map2) as new row in fresh df
-# Course, Tees, Transport = (if not the same) "Various"
-# Rating, Par, Duration, Score, fairways_hit, fairways, greens_in_reg, putts = sum
-# Slope = mean
-# nine_hole_round = T
-# Date, Quarter = max (presumably even-numbered row)
+}
 
+merge_nine_hole_rounds <- function(df) {
+  if (nrow(df) != 2) {
+    stop("Invalid nine_hole_round input")
+  }
+  # TODO check for equality in course/tees/transport and vary output as a result
+  df %>% dplyr::summarize
+  (
+    course = "nine-hole aggregate",
+    tees = "nine-hole aggregate",
+    rating = sum(rating),
+    slope = mean(slope),
+    par = sum(par),
+    transport = "nine-hole aggregate",
+    score = sum(score),
+    fairways_hit = sum(fairways_hit),
+    fairways = sum(fairways),
+    greens_in_reg = sum(greens_in_reg),
+    putts = sum(putts),
+    nine_hole_round = T,
+    date = max(date),
+    quarter = max(quarter)
+  )
 }
 
 validate_inputs <- function(input_data) {
