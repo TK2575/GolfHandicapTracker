@@ -1,8 +1,10 @@
 # TODO update namespace and/or roxygen comments to identify public/private functions
+#' @export
 transform_inputs <- function(input_data) {
   result <- input_data %>%
     validate_inputs() %>%
-    initial_transformation()
+    unique() %>%
+    interpret_date()
 
   if (suppressWarnings(sum(result$nine_hole_round)) > 1) {
     nine_hole_rounds <- result %>%
@@ -16,16 +18,17 @@ transform_inputs <- function(input_data) {
       dplyr::arrange(date)
   }
 
-  result <- result %>%
-    second_transformation() %>%
-    add_handicap_indexes
-
   result %>%
+    dplyr::mutate(over_under = compute_over_under(score, par),
+                  hndcp_diff = compute_handicap_differential(score, rating, slope)) %>%
+    dplyr::mutate(fir = fairways_hit/fairways * 100) %>%
+    dplyr::mutate(gir = greens_in_reg/18 * 100) %>%
+    dplyr::mutate(pph = putts/18) %>%
+    add_handicap_indexes() %>%
     dplyr::mutate(net_score = compute_net_score(score, course_handicap)) %>%
     dplyr::mutate(net_over_under = as.integer(round(net_score - par))) %>%
     dplyr::select(-hndcp_diff)
 
-  result
 }
 
 compute_over_under <- function(score, par) {
@@ -145,7 +148,7 @@ compute_nine_hole_rounds <- function(df) {
     dplyr::ungroup() %>%
     dplyr::select(-row_pair_index)
 
-  df[, colSums(is.na(na_test)) != nrow(na_test)]
+  df[, colSums(is.na(df)) != nrow(df)]
 }
 
 validate_inputs <- function(input_data) {
@@ -183,7 +186,7 @@ validate_inputs <- function(input_data) {
   result[, names(result) %in% all_columns]
 }
 
-initial_transformation <- function(input_data) {
+interpret_date <- function(input_data) {
   input_data %>%
     unique() %>%
     dplyr::mutate(dt = lubridate::mdy(date)) %>%
@@ -192,17 +195,6 @@ initial_transformation <- function(input_data) {
     dplyr::mutate(quarter = lubridate::floor_date(date, "quarter")) %>%
     dplyr::arrange(date)
 
-}
-
-second_transformation <- function(input_data) {
-  result <- input_data %>%
-    dplyr::mutate(over_under = compute_over_under(score, par),
-                  hndcp_diff = compute_handicap_differential(score, rating, slope)) %>%
-    dplyr::mutate(fir = fairways_hit/fairways * 100) %>%
-    dplyr::mutate(gir = greens_in_reg/18 * 100) %>%
-    dplyr::mutate(pph = putts/18)
-
-  result
 }
 
 add_handicap_indexes <- function(df) {
