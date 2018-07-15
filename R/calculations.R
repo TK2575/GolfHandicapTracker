@@ -1,4 +1,3 @@
-# TODO finish support nine hole rounds
 # TODO update namespace and/or roxygen comments to identify public/private functions
 transform_inputs <- function(input_data) {
   result <- input_data %>%
@@ -96,35 +95,46 @@ find_first_index <- function(row_number) {
 
 compute_nine_hole_rounds <- function(df) {
   if (nrow(df) %% 2 != 0) {
-    df <- df[1:nrow(df)-1,]
+    df <- df[1:nrow(df) - 1, ]
   }
-
-# TODO pass df in pairs of rows to merge_nine_hole_rounds(), store each result in new df
-
-}
-
-merge_nine_hole_rounds <- function(df) {
-  if (nrow(df) != 2) {
-    stop("Invalid nine_hole_round input")
-  }
-  # TODO check for equality in course/tees/transport and vary output as a result
-  df %>% dplyr::summarize
-  (
-    course = "nine-hole aggregate",
-    tees = "nine-hole aggregate",
-    rating = sum(rating),
-    slope = mean(slope),
-    par = sum(par),
-    transport = "nine-hole aggregate",
-    score = sum(score),
-    fairways_hit = sum(fairways_hit),
-    fairways = sum(fairways),
-    greens_in_reg = sum(greens_in_reg),
-    putts = sum(putts),
-    nine_hole_round = T,
-    date = max(date),
-    quarter = max(quarter)
-  )
+  # TODO test, defend against missing optional columns
+  df %>%
+    dplyr::mutate(row_pair_index = 1:nrow(df) %/% 2) %>%
+    dplyr::group_by(row_pair_index) %>%
+    dplyr::summarize
+    (
+      course = dplyr::if_else
+      (
+        dplyr::n_distinct(course) > 1,
+        "nine-hole aggregate",
+        min(course)
+      ),
+      tees = dplyr::if_else
+      (
+        dplyr::n_distinct(tees) > 1,
+        "nine-hole aggregate",
+        min(tees)
+      ),
+      rating = sum(rating),
+      slope = mean(slope),
+      par = sum(par),
+      transport = dplyr::if_else
+      (
+        dplyr::n_distinct(transport) > 1,
+        "nine-hole aggregate",
+        min(transport)
+      ),
+      score = sum(score),
+      fairways_hit = sum(fairways_hit),
+      fairways = sum(fairways),
+      greens_in_reg = sum(greens_in_reg),
+      putts = sum(putts),
+      nine_hole_round = T,
+      date = max(date),
+      quarter = max(quarter)
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-row_pair_index)
 }
 
 validate_inputs <- function(input_data) {
