@@ -97,32 +97,28 @@ compute_nine_hole_rounds <- function(df) {
   if (nrow(df) %% 2 != 0) {
     df <- df[1:nrow(df) - 1, ]
   }
-  # TODO test, defend against missing optional columns
+  # TODO defend against missing optional columns
   df %>%
-    dplyr::mutate(row_pair_index = 1:nrow(df) %/% 2) %>%
+    dplyr::mutate(row_pair_index = 0:(nrow(df)-1) %/% 2) %>%
     dplyr::group_by(row_pair_index) %>%
-    dplyr::summarize
-    (
-      course = dplyr::if_else
-      (
+    dplyr::summarize(
+      course = dplyr::if_else(
         dplyr::n_distinct(course) > 1,
-        "nine-hole aggregate",
-        min(course)
+        paste(dplyr::first(course), dplyr::last(course), sep = " - "),
+        dplyr::first(course)
       ),
-      tees = dplyr::if_else
-      (
+      tees = dplyr::if_else(
         dplyr::n_distinct(tees) > 1,
-        "nine-hole aggregate",
-        min(tees)
+        paste(dplyr::first(tees), dplyr::last(tees), sep = " - "),
+        dplyr::first(tees)
       ),
       rating = sum(rating),
       slope = mean(slope),
       par = sum(par),
-      transport = dplyr::if_else
-      (
+      transport = dplyr::if_else(
         dplyr::n_distinct(transport) > 1,
-        "nine-hole aggregate",
-        min(transport)
+        "Various",
+        dplyr::first(transport)
       ),
       score = sum(score),
       fairways_hit = sum(fairways_hit),
