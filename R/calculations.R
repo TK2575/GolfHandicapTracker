@@ -95,31 +95,44 @@ find_first_index <- function(row_number) {
 
 compute_nine_hole_rounds <- function(df) {
   if (nrow(df) %% 2 != 0) {
-    df <- df[1:nrow(df) - 1, ]
+    df <- df[1:nrow(df) - 1,]
   }
-  # TODO defend against missing optional columns
-  df %>%
-    dplyr::mutate(row_pair_index = 0:(nrow(df)-1) %/% 2) %>%
+
+  df <- df %>%
+    dplyr::mutate(row_pair_index = 0:(nrow(df) - 1) %/% 2) %>%
     dplyr::group_by(row_pair_index) %>%
     dplyr::summarize(
-      course = dplyr::if_else(
-        dplyr::n_distinct(course) > 1,
-        paste(dplyr::first(course), dplyr::last(course), sep = " - "),
-        dplyr::first(course)
-      ),
-      tees = dplyr::if_else(
-        dplyr::n_distinct(tees) > 1,
-        paste(dplyr::first(tees), dplyr::last(tees), sep = " - "),
-        dplyr::first(tees)
-      ),
+      course = if (exists('course', where = .))
+        dplyr::if_else(
+          dplyr::n_distinct(course) > 1,
+          paste(dplyr::first(course), dplyr::last(course), sep = " - "),
+          dplyr::first(course)
+        )
+      else
+        NA,
+      tees = if (exists('tees', where = .))
+        dplyr::if_else(
+          dplyr::n_distinct(tees) > 1,
+          paste(dplyr::first(tees), dplyr::last(tees), sep = " - "),
+          dplyr::first(tees)
+        )
+      else
+        NA,
       rating = sum(rating),
       slope = mean(slope),
       par = sum(par),
-      transport = dplyr::if_else(
-        dplyr::n_distinct(transport) > 1,
-        "Various",
-        dplyr::first(transport)
-      ),
+      transport = if (exists('transport', where = .))
+        dplyr::if_else(
+          dplyr::n_distinct(transport) > 1,
+          "Various",
+          dplyr::first(transport)
+        )
+      else
+        NA,
+      duration = if (exists('duration', where = .))
+        sum(duration)
+      else
+        NA,
       score = sum(score),
       fairways_hit = sum(fairways_hit),
       fairways = sum(fairways),
@@ -131,6 +144,8 @@ compute_nine_hole_rounds <- function(df) {
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(-row_pair_index)
+
+  df[, colSums(is.na(na_test)) != nrow(na_test)]
 }
 
 validate_inputs <- function(input_data) {
@@ -144,6 +159,7 @@ validate_inputs <- function(input_data) {
                         "greens_in_reg",
                         "putts")
 
+  # changes to optional columns need updates in compute_nine_hole_rounds too
   optional_columns <- c("course",
                         "tees",
                         "duration",
