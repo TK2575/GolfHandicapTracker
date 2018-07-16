@@ -1,4 +1,3 @@
-# TODO update namespace and/or roxygen comments to identify public/private functions
 #' @export
 transform_inputs <- function(input_data) {
   result <- input_data %>%

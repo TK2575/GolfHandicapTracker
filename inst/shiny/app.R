@@ -1,8 +1,6 @@
-library(shiny)
-source("../R/calculations.R")
-
-score_data <- suppressMessages(readr::read_csv("../data/example.csv"))
+score_data <- suppressMessages(readr::read_csv("../../data/example.csv"))
 calculated_data <- transform_inputs(score_data)
+# TODO rebuild other package imports (ggplot, shiny, plotly, etc)
 
 ui <- fluidPage(
 
@@ -33,7 +31,7 @@ ui <- fluidPage(
                              plotOutput(outputId = "over_time")
                              ),
                     tabPanel(title = "GIR vs FIR",
-                             plotlyOutput(outputId = "gir_fir")
+                             plotly::plotlyOutput(outputId = "gir_fir")
                              ),
                     # tabPanel(title = "By Slope",
                     #         plotOutput(outputId = "slope")
@@ -68,7 +66,7 @@ server <- function(input, output) {
     # FIXME clean up x/y labels
   })
 
-  output$gir_fir <- renderPlotly({
+  output$gir_fir <- plotly::renderPlotly({
      p <- filtered_data() %>%
        ggplot(aes(x=fir, y=gir, size = pph, color=net_over_under)) +
          geom_jitter(width = .2, alpha = .5) +
