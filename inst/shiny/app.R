@@ -1,6 +1,5 @@
 score_data <- suppressMessages(readr::read_csv("../../data/example.csv"))
 calculated_data <- transform_inputs(score_data)
-# TODO rebuild other package imports (ggplot, shiny, plotly, etc)
 
 ui <- fluidPage(
 
@@ -28,16 +27,13 @@ ui <- fluidPage(
       mainPanel(
         tabsetPanel(id = "tabspanel", type = "tabs",
                     tabPanel(title = "Over Time",
-                             plotOutput(outputId = "over_time")
+                             plotly::plotlyOutput(outputId = "over_time")
                              ),
                     tabPanel(title = "GIR vs FIR",
                              plotly::plotlyOutput(outputId = "gir_fir")
                              ),
-                    # tabPanel(title = "By Slope",
-                    #         plotOutput(outputId = "slope")
-                    #          ),
-                    tabPanel(title = "By Transport",
-                             plotOutput(outputId = "transport")
+                    tabPanel(title = "Data",
+                             DT::dataTableOutput(outputId = "table")
                              )
                     )
       )
@@ -50,20 +46,16 @@ server <- function(input, output) {
     calculated_data %>%
       tail(input$recent_slider)
   })
+  
+  # TODO fix display of date and percent columns
+  # TODO limit the number of columns in output, reorder
+  output$table <- DT::renderDataTable({
+    filtered_data()
+  })
 
   output$slope <- renderPlot({
     filtered_data() %>%
       ggplot(aes(factor()))
-  })
-
-  output$transport <- renderPlot({
-    filtered_data() %>%
-      ggplot(aes(factor(Transport), input$y, col = desc(quarter))) +
-        geom_jitter(width = .2) +
-        scale_color_gradientn(colors = terrain.colors(9))
-    # FIXME display of quarter in legend
-    # FIXME display scale in Y axis
-    # FIXME clean up x/y labels
   })
 
   output$gir_fir <- plotly::renderPlotly({
@@ -76,16 +68,17 @@ server <- function(input, output) {
          ylim(c(0,100)) +
          scale_size_continuous(trans="exp") +
          scale_color_gradientn(colors = terrain.colors(9))
-     ggplotly(p)
+     plotly::ggplotly(p)
    })
 
-  output$over_time <- renderPlot({
-    filtered_data() %>%
+  output$over_time <- plotly::renderPlotly({
+    q <- filtered_data() %>%
       ggplot(aes(date, over_under)) +
         geom_jitter() +
         xlab("Date") +
         ylab("Over/Under") +
         geom_line(aes(date, hndcp_index))
+    plotly::ggplotly(q)
   })
 }
 
