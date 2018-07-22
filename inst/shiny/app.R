@@ -1,6 +1,8 @@
 score_data <- suppressMessages(readr::read_csv("../../data/example.csv"))
 calculated_data <- transform_inputs(score_data)
 
+#TODO preload UI elements
+
 ui <- fluidPage(
 
    titlePanel("Golf Performance Tracker"),
@@ -20,14 +22,17 @@ ui <- fluidPage(
         sliderInput(inputId = "recent_slider",
                     label = "Recent Rounds:",
                     min = 1, max = nrow(calculated_data),
-                    value = floor(nrow(calculated_data)/2),
+                    value = min(40,floor(nrow(calculated_data)/2)),
                     step = 1)
       ),
 
       mainPanel(
         tabsetPanel(id = "tabspanel", type = "tabs",
-                    tabPanel(title = "Over Time",
-                             plotly::plotlyOutput(outputId = "over_time")
+                    tabPanel(title = "Handicap Index",
+                             plotly::plotlyOutput(outputId = "hi")
+                             ),
+                    tabPanel(title = "Trends",
+                             plotly::plotlyOutput(outputId = "trends")
                              ),
                     tabPanel(title = "GIR vs FIR",
                              plotly::plotlyOutput(outputId = "gir_fir")
@@ -71,7 +76,7 @@ server <- function(input, output) {
      plotly::ggplotly(p)
    })
 
-  output$over_time <- plotly::renderPlotly({
+  output$hi <- plotly::renderPlotly({
     q <- filtered_data() %>%
       ggplot(aes(date, over_under)) +
         geom_jitter() +
@@ -79,6 +84,13 @@ server <- function(input, output) {
         ylab("Over/Under") +
         geom_line(aes(date, hndcp_index))
     plotly::ggplotly(q)
+  })
+  
+  output$trends <- plotly::renderPlotly({
+    filtered_data() %>%
+      ggplot(aes(x=date,y=fir)) + 
+      geom_jitter() +
+      geom_line(aes(y=zoo::rollmean(fir,10,na.pad=T)))
   })
 }
 

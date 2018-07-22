@@ -7,6 +7,6 @@ Depends: R (>= 3.4.3), shiny, ggplot2
 License: TBD
 Encoding: UTF-8
 LazyData: true
-Imports: magrittr, readr, dplyr, purrr, lubridate, plotly, DT
+Imports: magrittr, readr, dplyr, purrr, lubridate, plotly, DT, zoo
 Suggests: testthat
 RoxygenNote: 6.0.1
