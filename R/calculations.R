@@ -23,7 +23,11 @@ transform_inputs <- function(input_data) {
     dplyr::mutate(fir = fairways_hit/fairways * 100) %>%
     dplyr::mutate(gir = greens_in_reg/18 * 100) %>%
     dplyr::mutate(pph = putts/18) %>%
-    add_handicap_indexes() %>%
+    add_rolling_average("hndcp_diff", "hndcp_index") %>% dplyr::rename(hndcp_index = name) %>%
+    add_rolling_average("fir", "fir_avg") %>% dplyr::rename(fir_avg = name) %>%
+    add_rolling_average("gir", "gir_avg") %>% dplyr::rename(gir_avg = name) %>%
+    add_rolling_average("pph", "pph_avg") %>% dplyr::rename(pph_avg = name) %>%
+    dplyr::mutate(course_handicap = compute_course_handicap(hndcp_index, slope)) %>%
     dplyr::mutate(net_score = compute_net_score(score, course_handicap)) %>%
     dplyr::mutate(net_over_under = as.integer(round(net_score - par))) %>%
     dplyr::select(-hndcp_diff)
@@ -46,23 +50,36 @@ compute_handicap_differential <- function(score, course_rating, course_slope) {
   return((score-course_rating) * (113/course_slope))
 }
 
-compute_handicap_index <- function(index, handicap_differentials) {
+compute_handicap_index <- function(index, samples) {
   diff_count <- pick_sample_size(index)
+  result <- NA
 
   if (diff_count > 0) {
     first_index <- find_first_index(index)
 
-    dt <- handicap_differentials[first_index:index] %>%
+    dt <- samples[first_index:index] %>%
       sort() %>%
       head(diff_count)
 
     result <- mean(dt) * .96
 
-  } else {result <- NA}
-
+  } 
+  
   result
+}
 
-
+compute_rolling_average <- function(index, samples) {
+  diff_count <- pick_sample_size(index)
+  result <- NA
+  
+  if (diff_count > 0) {
+    result <- samples %>%
+      tail(diff_count) %>%
+      mean()  
+  }
+  
+   result
+  
 }
 
 pick_sample_size <- function(count) {
@@ -196,19 +213,18 @@ interpret_date <- function(input_data) {
 
 }
 
-add_handicap_indexes <- function(df) {
-  diffs <- df %>% dplyr::select(hndcp_diff) %>% dplyr::pull()
-  purrr::map(
-    .x=c(1:length(diff)),
-    .f=compute_handicap_index,
-    handicap_differentials=diff)
-
-  hndcp_index <-
-    purrr::map(c(1:length(diffs)),compute_handicap_index,handicap_differentials = diffs) %>%
+add_rolling_average <- function(df, column, name) {
+  samples <- df %>% dplyr::select(column) %>% dplyr::pull()
+  
+  name <-
+    purrr::map(c(1:length(samples)),
+               ifelse(column=="hndcp_diff",
+                      compute_handicap_index,
+                      compute_rolling_average),
+               samples=samples) %>%
     unlist()
-
+  
   df %>%
-    tibble::add_column(hndcp_index) %>%
-    dplyr::mutate(course_handicap = compute_course_handicap(hndcp_index, slope))
+    tibble::add_column(name)
 }
 

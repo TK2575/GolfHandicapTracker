@@ -17,7 +17,7 @@ ui <- fluidPage(
                                 "Greens in Regulation" = "gir",
                                 "Putts Per Hole" = "pph"),
                     # TODO Round/Row count, Median/Sum Over/Under, Distinct Courses
-                    selected = "hndcp_index"),
+                    selected = "fir"),
 
         sliderInput(inputId = "recent_slider",
                     label = "Recent Rounds:",
@@ -87,10 +87,18 @@ server <- function(input, output) {
   })
   
   output$trends <- plotly::renderPlotly({
-    filtered_data() %>%
-      ggplot(aes(x=date,y=fir)) + 
+    r <- filtered_data() %>%
+      ggplot(aes_string(x="date",
+                        y=ifelse(input$y=="hndcp_index",
+                                 "over_under",
+                                 input$y))) +
       geom_jitter() +
-      geom_line(aes(y=zoo::rollmean(fir,10,na.pad=T)))
+      geom_line(aes_string(x="date",y=switch(input$y,
+                                             "hndcp_index" = "hndcp_index",
+                                             "fir" = "fir_avg",
+                                             "gir" = "gir_avg",
+                                             "pph" = "pph_avg")))
+    plotly::ggplotly(r)
   })
 }
 
