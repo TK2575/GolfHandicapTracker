@@ -18,7 +18,7 @@ ui <- fluidPage(
                                 "Putts Per Hole" = "pph"),
                     # TODO Round/Row count, Median/Sum Over/Under, Distinct Courses
                     selected = "fir"),
-
+        # TODO add ability to adjust rolling average size
         sliderInput(inputId = "recent_slider",
                     label = "Recent Rounds:",
                     min = 1, max = nrow(calculated_data),

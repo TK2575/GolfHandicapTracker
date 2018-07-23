@@ -73,9 +73,8 @@ compute_rolling_average <- function(index, samples) {
   result <- NA
   
   if (diff_count > 0) {
-    result <- samples %>%
-      tail(diff_count) %>%
-      mean()  
+    result <- samples[index-diff_count:index] %>%
+      mean()
   }
   
    result
